@@ -32,6 +32,7 @@ void Wheel::advance(double distInMM) {
  * to advance by one position..
  */
 void Wheel::update() {
+  // TODO: do we need to check if motor has completed previous action?
   if (degreesFromGoal != 0) {
     int increment = degreesFromGoal > 0 ? -1 : 1;
     pos += increment;

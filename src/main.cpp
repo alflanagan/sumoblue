@@ -2,10 +2,6 @@
 #include <Servo.h>
 #include "Wheel.h"
 
-// sheesh. need to find setting for more recent C dialect
-#define FALSE 0
-#define TRUE -1
-
 const int RIGHT_MOTOR = 10;
 const int LEFT_MOTOR = 9;
 
@@ -22,11 +18,11 @@ void setup() {
 }
 
 void loop() {
-  static int first_run = TRUE;
+  static bool first_run = true;
   if (first_run) {
     rightWheel.advance(30.0);
     leftWheel.advance(30.0);
-    first_run = FALSE;
+    first_run = false;
   }
   rightWheel.update();
   leftWheel.update();
