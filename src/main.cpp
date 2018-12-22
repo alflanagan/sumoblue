@@ -1,29 +1,76 @@
 #include <Arduino.h>
-#include <Servo.h>
-#include "Wheel.h"
+#include "SoftwareSerial.h"
+#include "SumoBluefruit.h"
+#define SOFTWARE_SERIAL_AVAILABLE 0
 
-const int RIGHT_MOTOR = 10;
-const int LEFT_MOTOR = 9;
+void getUserInput(char buffer[], uint8_t maxSize);
+void error(const __FlashStringHelper*err);
 
-const double WHEEL_RADIUS = 30.0; // mm
-
-const double DIST_PER_DEGREE = (WHEEL_RADIUS * 2.0 * PI) / 360.0;
-
-Wheel rightWheel(RIGHT_MOTOR, WHEEL_RADIUS);
-Wheel leftWheel(LEFT_MOTOR, WHEEL_RADIUS);
+SumoBluefruit ble;
 
 void setup() {
-  rightWheel.setup();
-  leftWheel.setup();
+  // initialize LED digital pin as an output.
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  Serial.begin(115200);
+  Serial.println(F("SumoBlue Command Module"));
+  Serial.println(F("-------------------------------------"));
+
+  ble.setup();
+
+  if (ble.get_status() == 0) {
+    Serial.println(F("Bluetooth OK"));
+  } else {
+    Serial.println(ble.get_error());
+  }
+
 }
 
 void loop() {
-  static bool first_run = true;
-  if (first_run) {
-    rightWheel.advance(30.0);
-    leftWheel.advance(30.0);
-    first_run = false;
+  int input = 0;
+  // // Check response status
+  // ble.waitForOK();
+
+  if (ble.available()) {
+    input = ble.read_uart();
+    Serial.print(input, 16);
+
   }
-  rightWheel.update();
-  leftWheel.update();
+  // ble.println(F("AT+GATTLIST"));
+
+  // ble.waitForOK();
+  // Serial.print(F("Done."));
+  // while(1);
+
+}
+
+/*
+<- +++,ATZ,ATI,ATE,AT+HELP,AT+FACTORYRESET,AT+DFU,AT+DBGMEMRD,AT+DBGNVMRD,
+AT+DBGSTACKSIZE,AT+DBGSTACKDUMP,AT+HWMODELED,AT+HWCONNLED,AT+HWRANDOM,AT+HWGETDIETEMP,
+AT+HWGPIOMODE,AT+HWGPIO,AT+HWI2CSCAN,AT+HWADC,AT+HWVBAT,AT+HWPWM,AT+HWPWRDN,
+AT+BLEPOWERLEVEL,AT+BLEGETADDRTYPE,AT+BLEGETADDR,AT+BLEGETPEERADDR,AT+BLEBEACON,
+AT+BLEGETRSSI,AT+BLEURIBEACON,AT+GAPGETCONN,AT+GAPDISCONNECT,AT+GAPDEVNAME,
+AT+GAPDELBONDS,AT+GAPINTERVALS,AT+GAPSTARTADV,AT+GAPSTOPADV,AT+GAPAUTOADV,
+AT+GAPSETADVDATA,AT+BLEUARTTX,AT+BLEUARTRX,AT+BLEKEYBOARDCODE,AT+BLEKEYBOARDEN,
+AT+BLEKEYBOARD,AT+GATTADDSERVICE,AT+GATTADDCHAR,AT+GATTCHAR,AT+GATTLIST,AT+GATTCLEAR
+*/
+/**************************************************************************/
+/*!
+    @brief  Checks for user input (via the Serial Monitor)
+*/
+/**************************************************************************/
+void getUserInput(char buffer[], uint8_t maxSize)
+{
+  memset(buffer, 0, maxSize);
+  while( Serial.available() == 0 ) {
+    delay(1);
+  }
+
+  uint8_t count=0;
+
+  do
+  {
+    count += Serial.readBytes(buffer+count, maxSize);
+    delay(2);
+  } while( (count < maxSize) && !(Serial.available() == 0) );
 }
