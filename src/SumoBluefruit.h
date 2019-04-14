@@ -29,6 +29,7 @@ class SumoBluefruit {
         inline int available(void) { return ble.available(); }
         inline int read(void) { return ble.read(); }
         char read_uart(void);
+        bool waitForOK(void) { return ble.waitForOK(); }
 };
 
 #endif
